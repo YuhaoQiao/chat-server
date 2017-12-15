@@ -18,44 +18,51 @@ import java.net.InetAddress;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class ServerThread {
-	private Socket socket;
-    private String userName;
-    private boolean isAlived;
-    private final LinkedList<String> messagesToSend;
-    private boolean hasMessages = false;
+public class ServerThread implements Runnable {
 
-    public ServerThread(Socket socket, String userName){
-        this.socket = socket;
-        this.userName = userName;
-        messagesToSend = new LinkedList<String>();
-    }
+	BufferedReader br;
+	Socket s;
+	int id;
 
-    public void addNextMessage(String message){
-        synchronized (messagesToSend){
-            hasMessages = true;
-            messagesToSend.push(message);
-        }
-    }
-    public void run() {
+	public ServerThread(Socket s) throws IOException {
+		// TODO Auto-generated constructor stub
+		br = new BufferedReader(new InputStreamReader(s.getInputStream()));
+	}
+
+	
+	// constantly receive all the message from clients when connect
+	@Override
+	public void run() {
 		try {
-
+			/*
+			 * System.out.println(
+			 * "JOINED_CHATROOM"+Thread.currentThread().getName()
+			 * +"SERVER_IP"+s.getLocalAddress() +"PORT"+s.getLocalPort()
+			 * +"ROOM_REF"+id +"JOIN_ID"+s.getInetAddress().getHostAddress());
+			 */
+			// TODO Auto-generated method stub
+			
 			String content = null;
 
 			while ((content = readFromClient()) != null) {
-				for (Socket s : ChatServer.sockets) {
+				for (Socket s : Server.sockets) {
 					PrintStream ps;
+					// push all messages to all Sockets
 					ps = new PrintStream(s.getOutputStream());
+
 					ps.println(content);
 				}
 
 			}
-		} catch (Exception e) {
 
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	}
+
+	// method to read message from clients
  
     private String readFromClient() throws Exception {
 
